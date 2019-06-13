@@ -12,14 +12,14 @@ int bar(int argc){
 
 int foo(int a, int argc,int (*bar)(int)){
 	if(a > 0)
-		return bar(argc);
+		a = a + bar(argc);
 
-	return 0;
+	return a;
 }
 
 int main(int argc, char **argv){
 	int a;
-	a = 1;
+	a = 0;
 	int c = foo(a, argc, bar);
 	
 	printf("%d \n", c);

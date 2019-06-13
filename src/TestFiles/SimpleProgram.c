@@ -10,7 +10,7 @@ int foo(int a, int b){
 int main(int argc, char **argv){
 
 	int a;
-	a = 1;
+	a = 0;
 	int sum = 0;
 	for (int i = 0; i < argc; i++) {
 		sum += i;
