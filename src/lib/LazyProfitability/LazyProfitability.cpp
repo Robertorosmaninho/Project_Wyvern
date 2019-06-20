@@ -27,7 +27,7 @@ void LazyProfitability::dump_csv(int n_functions, std::string fileName,
 	strcpy(str, fileName.c_str());
 	char * _name = strtok(str, ".");
 	strcat(_name, ".csv");
- 	
+	
 	_file.open(_name);	
 
 	//Escrevendo o cabeçalho do arquivo	
@@ -53,10 +53,10 @@ void LazyProfitability::dump_csv(int n_functions, std::string fileName,
 
 bool LazyProfitability::runOnModule(Module &M){
   for(Function &F : M){	
-	  for(BasicBlock &BB : F){
+		for(BasicBlock &BB : F){
       for(Instruction &I : BB){
 				//Reconhece se a instrução é uma chamada de função
-			  if(CallInst *Call = dyn_cast<CallInst>(&I)){
+				if(CallInst *Call = dyn_cast<CallInst>(&I)){
           _caller_function = F.getName();
 
 					//Pega o nome da função que está sendo analisada e que possui essa instrução
@@ -64,7 +64,7 @@ bool LazyProfitability::runOnModule(Module &M){
                                               (_id_function, _caller_function));
 
 					//Pega a função que está sendo chamada por essa instrução
-			    Function *Called = Call->getCalledFunction();
+					Function *Called = Call->getCalledFunction();
 					int _call_function = 0;	
 
 					//Se ela for uma função com nome
@@ -83,7 +83,7 @@ bool LazyProfitability::runOnModule(Module &M){
 							}
 						//Assodia o número de argumentos que são funções ao id da função chamada
 						std::stringstream ss;
-					 	ss << _call_function;
+						ss << _call_function;
 						_has_function_as_arguments.insert(std::pair<int, std::string>
 														(_id_function, ss.str()));
 						}           
