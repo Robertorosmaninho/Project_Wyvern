@@ -17,6 +17,10 @@
 #include "llvm/IR/Instructions.h"
 #include "llvm/Pass.h"
 
+#include <fstream>
+#include <cstring>
+#include <sstream>
+
 using namespace llvm;
 
 struct LazyProfitability : public ModulePass{
@@ -27,7 +31,7 @@ private:
 
   std::map<int,std::string> _caller_functions_map; //Id, Function Name
   std::map<int, std::string> _called_functions_map; //Id, Function Name
-  std::map<int, bool> _has_lazy_arguments; //Id, If has lazy arguments
+  std::map<int, std::string> _has_function_as_arguments; //Id, If has lazy arguments
 
   //The main ideia is to print a csv file with the follow columns:
   //Id, CallerFunctionName, CalledFunctionName, HasLazyArguments
@@ -37,6 +41,10 @@ private:
   //                                         NumberOfFunctionsWithLazyArguments
 	
 public:
+	void dump_csv(int id, std::string fileName, std::map<int,std::string> &caller, 
+									std::map<int, std::string> &called, 
+									std::map<int, std::string> &argument);
+
 static char ID;
 LazyProfitability() : ModulePass(ID){}
 
