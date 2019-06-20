@@ -16,8 +16,8 @@ void LazyProfitability::getAnalysisUsage(AnalysisUsage &AU) const {
 }
 
 void LazyProfitability::dump_csv(int n_functions, std::string fileName, 
-								std::map<int,std::string> &caller, 
-								std::map<int, std::string> &called, 
+                std::map<int,std::string> &caller, 
+                std::map<int, std::string> &called, 
 								std::map<int, std::string> &argument){
 
 	//Define nome do arquivo
