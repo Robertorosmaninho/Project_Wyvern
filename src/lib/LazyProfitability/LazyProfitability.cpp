@@ -52,9 +52,6 @@ void LazyProfitability::dump_csv(int n_functions, std::string fileName,
 }
 
 bool LazyProfitability::runOnModule(Module &M){
-	/*errs() << "Nome do modulo: " << M.getModuleIdentifier() << "\n";
-  errs() << "FunctionId"<< "\t" << "FunctionAnalyzed" << "\t" << \
-						"CallerFunctionName" << "\t" << "hasFunctionCalled"<< "\n"; */
   for(Function &F : M){	
 	  for(BasicBlock &BB : F){
       for(Instruction &I : BB){
@@ -103,10 +100,7 @@ bool LazyProfitability::runOnModule(Module &M){
   }
 	dump_csv(_n_functions, M.getModuleIdentifier(), _caller_functions_map,\
 									_called_functions_map, _has_function_as_arguments);
-/*	errs() << "----------------------------------------------------------------\
------------------\n";
-	errs() << "Number of Functions: " << _n_functions << "\n";
-	errs() << "Number of Opportunities: " << _opportunity << "\n";*/
+
   return false;
 }
 
