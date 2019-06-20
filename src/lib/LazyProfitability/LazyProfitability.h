@@ -14,14 +14,28 @@
 
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Function.h"
+#include "llvm/IR/Instructions.h"
 #include "llvm/Pass.h"
 
 using namespace llvm;
 
 struct LazyProfitability : public ModulePass{
 private:
-	int _opportunity;
+  int _id_function = 0, _n_functions = 0, _opportunity = 0;
+  std::string _caller_function, _called_function, _argument_function;
+  bool _lazy_arguments, _caller_lazy_arguments;
 
+  std::map<int,std::string> _caller_functions_map; //Id, Function Name
+  std::map<int, std::string> _called_functions_map; //Id, Function Name
+  std::map<int, bool> _has_lazy_arguments; //Id, If has lazy arguments
+
+  //The main ideia is to print a csv file with the follow columns:
+  //Id, CallerFunctionName, CalledFunctionName, HasLazyArguments
+  //
+  //And other csv file that resumes the content of the program
+  //NumberOfFunctions, CallerOfFunctionsWith, NumberOfCalledFunctions, 
+  //                                         NumberOfFunctionsWithLazyArguments
+	
 public:
 static char ID;
 LazyProfitability() : ModulePass(ID){}
