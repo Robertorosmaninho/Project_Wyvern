@@ -16,6 +16,7 @@ int main(int argc, char **argv){
 		sum += i;
 	}
 	int c = foo(a, sum);
+  int d = foo(c, foo(a, sum));
 
 	printf("%d \n", c);
 return 0;

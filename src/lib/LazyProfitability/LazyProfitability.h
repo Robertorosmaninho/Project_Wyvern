@@ -45,6 +45,8 @@ public:
 									std::map<int, std::string> &called, 
 									std::map<int, std::string> &argument);
 
+  void dump_summary_csv(std::string fileName,int n_functions, int opportunity);
+
 static char ID;
 LazyProfitability() : ModulePass(ID){}
 

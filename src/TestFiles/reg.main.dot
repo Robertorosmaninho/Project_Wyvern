@@ -1,0 +1,30 @@
+digraph "Region Graph for 'main' function" {
+	label="Region Graph for 'main' function";
+
+	Node0x7f87dd505fc0 [shape=record,label="{entry:\l  %retval = alloca i32, align 4\l  %argc.addr = alloca i32, align 4\l  %argv.addr = alloca i8**, align 8\l  %a = alloca i32, align 4\l  %sum = alloca i32, align 4\l  %i = alloca i32, align 4\l  %c = alloca i32, align 4\l  %d = alloca i32, align 4\l  store i32 0, i32* %retval, align 4\l  store i32 %argc, i32* %argc.addr, align 4\l  store i8** %argv, i8*** %argv.addr, align 8\l  store i32 0, i32* %a, align 4\l  store i32 0, i32* %sum, align 4\l  store i32 0, i32* %i, align 4\l  br label %for.cond\l}"];
+	Node0x7f87dd505fc0 -> Node0x7f87dd50b060;
+	Node0x7f87dd50b060 [shape=record,label="{for.cond:                                         \l  %0 = load i32, i32* %i, align 4\l  %1 = load i32, i32* %argc.addr, align 4\l  %cmp = icmp slt i32 %0, %1\l  br i1 %cmp, label %for.body, label %for.end\l}"];
+	Node0x7f87dd50b060 -> Node0x7f87dd506770;
+	Node0x7f87dd50b060 -> Node0x7f87dd503030;
+	Node0x7f87dd506770 [shape=record,label="{for.body:                                         \l  %2 = load i32, i32* %i, align 4\l  %3 = load i32, i32* %sum, align 4\l  %add = add nsw i32 %3, %2\l  store i32 %add, i32* %sum, align 4\l  br label %for.inc\l}"];
+	Node0x7f87dd506770 -> Node0x7f87dd505430;
+	Node0x7f87dd505430 [shape=record,label="{for.inc:                                          \l  %4 = load i32, i32* %i, align 4\l  %inc = add nsw i32 %4, 1\l  store i32 %inc, i32* %i, align 4\l  br label %for.cond\l}"];
+	Node0x7f87dd505430 -> Node0x7f87dd50b060[constraint=false];
+	Node0x7f87dd503030 [shape=record,label="{for.end:                                          \l  %5 = load i32, i32* %a, align 4\l  %6 = load i32, i32* %sum, align 4\l  %call = call i32 @foo(i32 %5, i32 %6)\l  store i32 %call, i32* %c, align 4\l  %7 = load i32, i32* %c, align 4\l  %8 = load i32, i32* %a, align 4\l  %9 = load i32, i32* %sum, align 4\l  %call1 = call i32 @foo(i32 %8, i32 %9)\l  %call2 = call i32 @foo(i32 %7, i32 %call1)\l  store i32 %call2, i32* %d, align 4\l  %10 = load i32, i32* %c, align 4\l  %call3 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([5 x i8],\l... [5 x i8]* @.str, i32 0, i32 0), i32 %10)\l  ret i32 0\l}"];
+	colorscheme = "paired12"
+        subgraph cluster_0x7f87dd50b3e0 {
+          label = "";
+          style = filled;
+          color = 1
+          subgraph cluster_0x7f87dd50b440 {
+            label = "";
+            style = filled;
+            color = 3
+            Node0x7f87dd50b060;
+            Node0x7f87dd506770;
+            Node0x7f87dd505430;
+          }
+          Node0x7f87dd505fc0;
+          Node0x7f87dd503030;
+        }
+}

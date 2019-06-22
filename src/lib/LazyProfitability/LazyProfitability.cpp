@@ -22,13 +22,7 @@ void LazyProfitability::dump_csv(int n_functions, std::string fileName,
 
   //Define nome do arquivo
   std::ofstream _file;
-  fileName = "Count_" + fileName;
-  char str[fileName.size() + 1];
-  strcpy(str, fileName.c_str());
-  char * _name = strtok(str, ".");
-  strcat(_name, ".csv");
-	
-  _file.open(_name);	
+  _file.open("Details.csv");	
 
   //Escrevendo o cabeçalho do arquivo	
   _file << "FunctionId,FunctionAnalyzed,CallerFunctionName,hasFunctionCalled\n";
@@ -51,10 +45,35 @@ void LazyProfitability::dump_csv(int n_functions, std::string fileName,
   _file.close();
 }
 
+void LazyProfitability::dump_summary_csv(std::string fileName, int n_functions, 
+                                         int opportunity){
+  //Define nome do arquivo
+  std::ofstream _file;
+   _file.open("Summary.csv");	
+    _file << "ProgramName,FunctionsAnalyzed,Opportunities\n";
+    _file << fileName << "," << n_functions << "," << opportunity << "\n";
+  _file.close();
+}
 bool LazyProfitability::runOnModule(Module &M){
   for(Function &F : M){	
+    std::map<Value*, Value*> _stored_value_function;
     for(BasicBlock &BB : F){
       for(Instruction &I : BB){
+       
+        //Reconhece valores resutlantes de funções que foram salvos em uma
+        //variavel e inserem no map 1. A variavel 2. Achamada da função
+        if(StoreInst *Store = dyn_cast<StoreInst>(&I)){
+          Value *v = Store->getValueOperand();
+          if(isa<Instruction>(v)){
+            if(Instruction *inst = cast<Instruction>(v)){
+              if(CallInst *call = dyn_cast<CallInst>(inst)){
+                _stored_value_function.insert(std::pair<Value*, Value*>
+                                 (Store->getOperand(1), Store->getOperand(0)));
+              }
+            }
+          }   
+        }
+
         //Reconhece se a instrução é uma chamada de função
         if(CallInst *Call = dyn_cast<CallInst>(&I)){
           _caller_function = F.getName();
@@ -65,7 +84,7 @@ bool LazyProfitability::runOnModule(Module &M){
 
           //Pega a função que está sendo chamada por essa instrução
           Function *Called = Call->getCalledFunction();
-          int _call_function = 0;	
+          int _call_function = 0, _function_value_used = 0;;	
 
           //Se ela for uma função com nome
           if(Called != NULL){
@@ -81,8 +100,20 @@ bool LazyProfitability::runOnModule(Module &M){
                   _call_function++; 
                   _opportunity++;
                 }
+                if(auto *value = dyn_cast<LoadInst>(argOp)){
+                  std::map<Value*, Value*>::iterator it;
+                  it = _stored_value_function.find(value->getOperand(0));
+                  if(it != _stored_value_function.end()){
+                    if(Instruction *inst = dyn_cast<Instruction>(it->second)){
+                      if(CallInst *inside_call = dyn_cast<CallInst>(inst)){
+                        _function_value_used++;
+                        _opportunity++
+                      }
+                    }
+                  }
+                }
               }
-              //Assodia o número de argumentos que são funções ao id da função chamada
+              //Associa o número de argumentos que são funções ao id da função chamada
               std::stringstream ss;
               ss << _call_function;
               _has_function_as_arguments.insert(std::pair<int, std::string>
@@ -98,7 +129,7 @@ bool LazyProfitability::runOnModule(Module &M){
   }
   dump_csv(_n_functions, M.getModuleIdentifier(), _caller_functions_map,\
                       _called_functions_map, _has_function_as_arguments);
-
+  dump_summary_csv(M.getModuleIdentifier(),_n_functions,_opportunity);
   return false;
 }
 
