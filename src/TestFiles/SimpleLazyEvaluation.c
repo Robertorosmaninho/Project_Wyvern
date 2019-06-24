@@ -1,5 +1,10 @@
 #include <stdio.h>
 
+void func(int a, int sum){
+  if(a > 0)
+    printf("%d\n", sum);
+}
+
 int bar(int argc){
 	int sum = 0;
 	if (argc > 0){

@@ -1,4 +1,4 @@
-add_llvm_library(LazyProfitability LazyProfitability.cpp)
+add_llvm_library(LazyProfitability LazyProfitability.cpp PostDom.cpp)
 
 # Use C++11 to compile your pass (i.e., supply -std=c++11).
 target_compile_features(LazyProfitability PRIVATE cxx_range_for cxx_auto_type)

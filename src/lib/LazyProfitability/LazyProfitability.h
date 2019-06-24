@@ -12,6 +12,7 @@
 #ifndef LLVM_LIB_TRANSFORMS_LAZYPROFITABILITY_H
 #define LLVM_LIB_TRANSFORMS_LAZYPROFITABILITY_H
 
+#include <llvm/Analysis/PostDominators.h>
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Instructions.h"
@@ -25,27 +26,36 @@ using namespace llvm;
 
 struct LazyProfitability : public ModulePass{
 private:
-  int _id_function = 0, _n_functions = 0, _opportunity = 0;
-  std::string _caller_function, _called_function, _argument_function;
+  int _id_function = 0, _n_functions = 0, _n_call = 0, _value_opportunity = 0, 
+      _function_opportunity = 0, _call_function = 0, _function_value_used = 0;
+  std::string _analyzed_function, _caller_function, _called_function, 
+                                                            _argument_function;
   bool _lazy_arguments, _caller_lazy_arguments;
-
-  std::map<int,std::string> _caller_functions_map; //Id, Function Name
-  std::map<int, std::string> _called_functions_map; //Id, Function Name
-  std::map<int, std::string> _has_function_as_arguments; //Id, If has lazy arguments
+  
+  std::map<int, std::string> _function_analyzed_map; //Id, Function Name
+  std::map<int, std::string> _function_caller_map; //Id, Function Name
+  std::map<int, std::string> _function_called_map; //Id, Function Name
+  std::map<int, int> _has_function_as_arguments; //Id, If has lazy arguments
+  std::map<int, int> _has_function_value_as_arguments; //Id, If an value can
+                                                        //be lazy
 
   //The main ideia is to print a csv file with the follow columns:
-  //Id, CallerFunctionName, CalledFunctionName, HasLazyArguments
+  //Id, FunctionName, FunctionCallerName, FunctionCalledName,
+  //HasFunctionAsArguments, HasValueFunction
   //
   //And other csv file that resumes the content of the program
-  //NumberOfFunctions, CallerOfFunctionsWith, NumberOfCalledFunctions, 
-  //                                         NumberOfFunctionsWithLazyArguments
+  //NameOfProgram,NumberOfFunctionsAnalyzed, NumberOfCalls, OpportunitiesValues, 
+  //                                                     OpportunitiesFunctions
 	
 public:
-	void dump_csv(int id, std::string fileName, std::map<int,std::string> &caller, 
-									std::map<int, std::string> &called, 
-									std::map<int, std::string> &argument);
+	void dump_csv(std::map<int, std::string> &analyzed,
+                std::map<int, std::string> &caller,
+                std::map<int, std::string> &called,
+                std::map<int, int> &f_argument,
+                std::map<int, int> &v_argument);
 
-  void dump_summary_csv(std::string fileName,int n_functions, int opportunity);
+  void dump_summary_csv(std::string fileName,int n_functions, int n_call,
+                          int value_opportunity, int function_opportunity);
 
 static char ID;
 LazyProfitability() : ModulePass(ID){}

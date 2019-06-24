@@ -1,5 +1,0 @@
-FunctionId,FunctionAnalyzed,CallerFunctionName,hasFunctionCalled
-0,main,foo,0
-1,main,foo,0
-2,main,foo,0
-3,main,printf,0
