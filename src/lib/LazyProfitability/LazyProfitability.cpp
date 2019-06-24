@@ -10,9 +10,10 @@
 //===____________________________________________________________________===//
 
 #include "LazyProfitability.h"
-
+#include "PostDom.h"
+  
 void LazyProfitability::getAnalysisUsage(AnalysisUsage &AU) const {
-  //AU.addRequired<PostDom>();
+  AU.addRequired<PostDominatorTreeWrapperPass>();
   AU.setPreservesAll();
 }
 
@@ -22,11 +23,13 @@ void LazyProfitability::dump_csv(std::map<int, std::string> &analyzed,
                                  std::map<int, std::string> &caller, 
                                  std::map<int, std::string> &called, 
                                  std::map<int, int> &f_argument,
-                                 std::map<int, int> &v_argument){
+                                 std::map<int, int> &v_argument,
+                                 std::string functionName){
 
   //Define nome do arquivo
   std::ofstream _file;
-  _file.open("Details.csv");	
+  std::string name  = "Details_" + functionName + ".csv";
+  _file.open(name);	
 
   //Escrevendo o cabeçalho do arquivo	
   _file << "Id, FunctionName, FunctionCallerName, FunctionCalledName, \
@@ -73,116 +76,143 @@ void LazyProfitability::dump_csv(std::map<int, std::string> &analyzed,
 
 //Imprime o nome do programa analisado e a quantidade de oportunidades para usar
 //Lazy Evaluation
-void LazyProfitability::dump_summary_csv(std::string fileName,int n_functions, 
-                 int n_call, int value_opportunity, int function_opportunity){
+void LazyProfitability::dump_summary_csv(std::string functionName,
+  int n_functions, int n_call, int value_opportunity, int function_opportunity){
   //Define nome do arquivo
   std::ofstream _file;
-   _file.open("Summary.csv");	
-    _file << "NameOfProgram,NumberOfFunctionsAnalyzed, NumberOfCalls,\
+  std::string name = "Summary_" + functionName + ".csv";
+
+   _file.open(name);	
+    _file << "NameOfFunction,NumberOfFunctionsAnalyzed, NumberOfCalls,\
                             OpportunitiesValues, OpportunitiesFunctions\n";
-    _file << fileName << "," << n_functions << ","  << n_call << "," << \
+    _file << functionName << "," << n_functions << ","  << n_call << "," << \
              value_opportunity << "," << function_opportunity << "\n";
   _file.close();
 }
-bool LazyProfitability::runOnModule(Module &M){
-  for(Function &F : M){	
-    std::map<Value*, Value*> _stored_value_function;
-    for(BasicBlock &BB : F){
+bool LazyProfitability::runOnFunction(Function &F){
+  auto PDT = &getAnalysis<PostDominatorTreeWrapperPass>().getPostDomTree();
+  PostDom *PD;
 
-        errs() << "BasicBlock: "<< BB.getName() << "\n";
+  std::map<Value*, Value*> _stored_value_function;
 
-      for(Instruction &I : BB){
-        //Reconhece valores resutlantes de funções que foram salvos em uma
-        //variavel e inserem no map 1. A variavel 2. Achamada da função
-        if(StoreInst *Store = dyn_cast<StoreInst>(&I)){
-          Value *v = Store->getValueOperand();
-          if(isa<Instruction>(v)){
-            if(Instruction *inst = cast<Instruction>(v)){
-              if(CallInst *call = dyn_cast<CallInst>(inst)){
-                _stored_value_function.insert(std::pair<Value*, Value*>
-                                 (Store->getOperand(1), Store->getOperand(0)));
-              }
+  PD->set_entry(&F.getEntryBlock());
+
+  std::vector<Value*> _function_args;
+
+  for( auto arg = F.arg_begin(); arg != F.arg_end(); ++arg) 
+    _function_args.push_back(arg);
+
+  for(BasicBlock &BB : F){
+    for(Instruction &I : BB){
+      
+      for(auto Op = I.op_begin(); Op != I.op_end(); ++Op){
+        for(int i = 0; i <  _function_args.size(); i++){
+          if(Op->get()->hasName() && _function_args[i]->hasName()){
+            std::string name = _function_args[i]->getName();
+            std::string name_addr = name + ".addr"; 
+            
+            std::string OpName = Op->get()->getName();
+            if( OpName == name || OpName == name_addr){
+              errs() << "Gol: " << Op->get()->getName()  << " - " << \
+_function_args[i]->getName()<< "\nBB_name: " << BB.getName() <<"\n----------------\n"; 
             }
-          }   
+          }
         }
+      }
 
-        //Reconhece se a instrução é uma chamada de função
-        if(CallInst *Call = dyn_cast<CallInst>(&I)){
-          _analyzed_function = F.getName();
-          errs() << F.getName() << "\n";
+      
 
-          //Pega o nome da função que está sendo analisada e que possui essa instrução
-         	_function_analyzed_map.insert(std::pair<int, std::string>
-                                            (_id_function, _analyzed_function));
 
-          //Pega a função que está sendo chamada por essa instrução
-          Function *Caller = Call->getCalledFunction();
-          _call_function = 0;
-          _function_value_used = 0;	
+      //Reconhece valores resutlantes de funções que foram salvos em uma
+      //variavel e inserem no map 1. A variavel 2. Achamada da função
+      if(StoreInst *Store = dyn_cast<StoreInst>(&I)){
+        Value *v = Store->getValueOperand();
+        if(isa<Instruction>(v)){
+          if(Instruction *inst = cast<Instruction>(v)){
+            if(CallInst *call = dyn_cast<CallInst>(inst)){
+              _stored_value_function.insert(std::pair<Value*, Value*>
+                               (Store->getOperand(1), Store->getOperand(0)));
+            }
+          }
+        }   
+      }
 
-          //Se ela for uma função com nome
-          if(Caller != NULL){
-            if(Caller->hasName()){
-              //Associa o nome da função chamada com seu id
-              _caller_function = Caller->getName();
-              _function_caller_map.insert(std::pair<int, std::string>
-                                              (_id_function, _caller_function));
-              //Verifica se a função chamada possui outra funçao como argumento
-              for( auto argOp = Call->arg_begin(); argOp != Call->arg_end();
+      //Reconhece se a instrução é uma chamada de função
+      if(CallInst *Call = dyn_cast<CallInst>(&I)){
+        _analyzed_function = F.getName();
+  //      errs() << F.getName() << "\n";
+
+        //Pega o nome da função que está sendo analisada e que possui essa instrução
+        _function_analyzed_map.insert(std::pair<int, std::string>
+                                           (_id_function, _analyzed_function));
+
+        //Pega a função que está sendo chamada por essa instrução
+        Function *Caller = Call->getCalledFunction();
+        _call_function = 0;
+        _function_value_used = 0;	
+
+        //Se ela for uma função com nome
+        if(Caller != NULL){
+          if(Caller->hasName()){
+            //Associa o nome da função chamada com seu id
+            _caller_function = Caller->getName();
+            _function_caller_map.insert(std::pair<int, std::string>
+                                             (_id_function, _caller_function));
+            //Verifica se a função chamada possui outra funçao como argumento
+            for( auto argOp = Call->arg_begin(); argOp != Call->arg_end();
                                                                       ++argOp){
-                //Reconhece se um dos argumentos é uma função
-                if(auto fn = dyn_cast<Function>(argOp)){
-                  _called_function = fn->getName();
-                  //Associa o nome da função ao id da funçao analizada
-                  _function_called_map.insert(std::pair<int, std::string>
+              //Reconhece se um dos argumentos é uma função
+              if(auto fn = dyn_cast<Function>(argOp)){
+                _called_function = fn->getName();
+                //Associa o nome da função ao id da funçao analizada
+                _function_called_map.insert(std::pair<int, std::string>
                                               (_id_function, _called_function));
-                  _call_function++; 
-                  _function_opportunity++;
+                _call_function++; 
+                _function_opportunity++;
 
-                  //Associa o número de argumentos que são funções ao id da função chamada
-                  _has_function_as_arguments.insert(std::pair<int, int>
+                //Associa o número de argumentos que são funções ao id da função chamada
+                _has_function_as_arguments.insert(std::pair<int, int>
                                                 (_id_function, _call_function));
 
-                }
-                //Reconhece se um dos argumentos é resultado de uma função
-                if(auto *value = dyn_cast<LoadInst>(argOp)){
-                  std::map<Value*, Value*>::iterator it;
-                  it = _stored_value_function.find(value->getOperand(0));
-                  if(it != _stored_value_function.end()){
-                    if(Instruction *inst = dyn_cast<Instruction>(it->second)){
-                      if(CallInst *inside_call = dyn_cast<CallInst>(inst)){
-                        _function_value_used++;
-                        _value_opportunity++;
+              }
+              //Reconhece se um dos argumentos é resultado de uma função
+              if(auto *value = dyn_cast<LoadInst>(argOp)){
+                std::map<Value*, Value*>::iterator it;
+                it = _stored_value_function.find(value->getOperand(0));
+                if(it != _stored_value_function.end()){
+                  if(Instruction *inst = dyn_cast<Instruction>(it->second)){
+                    if(CallInst *inside_call = dyn_cast<CallInst>(inst)){
+                      _function_value_used++;
+                      _value_opportunity++;
 
-                        _has_function_value_as_arguments.insert(
-                        std::pair<int, int>(_id_function, _function_value_used)); 
-                      }
+                      _has_function_value_as_arguments.insert(
+                      std::pair<int, int>(_id_function, _function_value_used)); 
                     }
                   }
                 }
-
-                if(auto *regCall = dyn_cast<CallInst>(argOp)){
-                  auto *fn = regCall->getCalledFunction(); 
-                  //Associa o nome da função ao id da funçao analizada
-                  _function_called_map.insert(std::pair<int, std::string>
-                                              (_id_function, _called_function));
-                  _call_function++; 
-                  _function_opportunity++;
-
-                  //Associa o número de argumentos que são funções ao id da função chamada
-                  _has_function_as_arguments.insert(std::pair<int, int>
-                                                (_id_function, _call_function));
-                }
               }
-              _n_call++;
-            }           
-          }	
 
-          _id_function++;
-          _n_functions++;
-        }
-      }	
-    }
+              if(auto *regCall = dyn_cast<CallInst>(argOp)){
+                auto *fn = regCall->getCalledFunction(); 
+                //Associa o nome da função ao id da funçao analizada
+                _function_called_map.insert(std::pair<int, std::string>
+                                             (_id_function, _called_function));
+                _call_function++; 
+                _function_opportunity++;
+
+                //Associa o número de argumentos que são funções ao id da função chamada
+                _has_function_as_arguments.insert(std::pair<int, int>
+                                                (_id_function, _call_function));
+              }
+            }
+            _n_call++;
+          }           
+        }	
+
+        _id_function++;
+        _n_functions++;
+      }
+    }	
   }
   errs() << "Analyzed: " << _function_analyzed_map.size() << "\n";
   errs() << "Caller: " << _function_caller_map.size() << "\n";
@@ -191,12 +221,12 @@ bool LazyProfitability::runOnModule(Module &M){
   errs() << "Func_Value: " << _has_function_value_as_arguments.size() << "\n\n";
 
   errs() << "FuncOp: " << _function_opportunity << "\n";
-  errs() << "ValueOp: " << _value_opportunity << "\n";
+  errs() << "ValueOp: " << _value_opportunity << "\n\n";
 
   dump_csv(_function_analyzed_map, _function_caller_map, _function_called_map, 
-           _has_function_as_arguments, _has_function_value_as_arguments);
+     _has_function_as_arguments, _has_function_value_as_arguments,F.getName());
 
-  dump_summary_csv(M.getModuleIdentifier(),_n_functions, _n_call, 
+  dump_summary_csv(F.getName(),_n_functions, _n_call, 
                    _value_opportunity, _function_opportunity);
   return false;
 }

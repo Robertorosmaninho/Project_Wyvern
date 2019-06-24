@@ -24,7 +24,7 @@
 
 using namespace llvm;
 
-struct LazyProfitability : public ModulePass{
+struct LazyProfitability : public FunctionPass{
 private:
   int _id_function = 0, _n_functions = 0, _n_call = 0, _value_opportunity = 0, 
       _function_opportunity = 0, _call_function = 0, _function_value_used = 0;
@@ -44,7 +44,7 @@ private:
   //HasFunctionAsArguments, HasValueFunction
   //
   //And other csv file that resumes the content of the program
-  //NameOfProgram,NumberOfFunctionsAnalyzed, NumberOfCalls, OpportunitiesValues, 
+  //NameOfFunction,NumberOfFunctionsAnalyzed, NumberOfCalls, OpportunitiesValues, 
   //                                                     OpportunitiesFunctions
 	
 public:
@@ -52,16 +52,17 @@ public:
                 std::map<int, std::string> &caller,
                 std::map<int, std::string> &called,
                 std::map<int, int> &f_argument,
-                std::map<int, int> &v_argument);
+                std::map<int, int> &v_argument,  
+                std::string functionName);
 
   void dump_summary_csv(std::string fileName,int n_functions, int n_call,
                           int value_opportunity, int function_opportunity);
 
 static char ID;
-LazyProfitability() : ModulePass(ID){}
+LazyProfitability() : FunctionPass(ID){}
 
 void getAnalysisUsage(AnalysisUsage &AU) const;
-virtual bool runOnModule(Module &M);
+virtual bool runOnFunction(Function &F);
 };
 
 #endif
