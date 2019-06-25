@@ -24,6 +24,7 @@ void LazyProfitability::dump_csv(std::map<int, std::string> &analyzed,
                                  std::map<int, std::string> &called, 
                                  std::map<int, int> &f_argument,
                                  std::map<int, int> &v_argument,
+                                 std::map<std::string, int> &pd_argument,
                                  std::string functionName){
 
   //Define nome do arquivo
@@ -33,16 +34,18 @@ void LazyProfitability::dump_csv(std::map<int, std::string> &analyzed,
 
   //Escrevendo o cabeçalho do arquivo	
   _file << "Id, FunctionName, FunctionCallerName, FunctionCalledName, \
-            HasFunctionAsArguments, HasValueFunction\n";
+            HasFunctionAsArguments, HasValueFunction, HasPostDomArguments\n";
 
-  auto itF = f_argument.begin(), itV = v_argument.begin();
+  auto itF = f_argument.begin(), itV = v_argument.begin(); 
+  auto itPD = pd_argument.end(); itPD--;
   for(auto it=caller.begin(), itA=analyzed.begin(), itC=called.begin(); 
-                  itA != analyzed.end(); ++itA){
+                                                itA != analyzed.end(); ++itA){
+    //id, FunctionAnalyzed
     _file << it->first << "," << itA->second;
     
     if(it != caller.end() && it->first == itA->first){
       _file << "," << it->second;
-      //id, FunctionAnalyzed, FunctionCaller
+     //FunctionCallerName
       it++;
     }else{
       _file << "," << " - ";
@@ -50,6 +53,7 @@ void LazyProfitability::dump_csv(std::map<int, std::string> &analyzed,
 
     if(itC != called.end() && (itA->first == itC->first) ){			
       _file << "," << itC->second;
+      //FuncitonCalledName
       itC++;
     }else{
       _file << "," << " - ";
@@ -57,6 +61,7 @@ void LazyProfitability::dump_csv(std::map<int, std::string> &analyzed,
 
     if(itF != f_argument.end() && (itA->first == itF->first) ){
       _file << "," << itF->second;
+      //HasFunctionAsArguments
       itF++;
     }else{
       _file << "," << 0;  
@@ -64,11 +69,20 @@ void LazyProfitability::dump_csv(std::map<int, std::string> &analyzed,
 
     if(itV != v_argument.end() && (itA->first == itV->first)){
       _file << "," << itV->second;
+      //HasValueFunction
       itV++;
     }else{
       _file << "," << 0;
     }
 
+    errs() << "PD: " << itPD->first << "\nF_name: " << itA->second << "\n";
+    if(itPD != pd_argument.begin() && (itPD->first == itA->second)){
+      _file << "," << itPD->second;
+      //HasUsesofArgumentsThatPostDomTheEntry
+      itPD--; 
+    }else{
+      _file << "," << 0;
+    }
     _file << "\n";
   }
   _file.close();
@@ -91,20 +105,20 @@ void LazyProfitability::dump_summary_csv(std::string functionName,
 }
 bool LazyProfitability::runOnFunction(Function &F){
   auto PDT = &getAnalysis<PostDominatorTreeWrapperPass>().getPostDomTree();
-  PostDom *PD;
+  PostDom *PD = new PostDom();
 
   std::map<Value*, Value*> _stored_value_function;
 
   PD->set_entry(&F.getEntryBlock());
 
-  std::vector<Value*> _function_args;
+ std::vector<Value*> _function_args;
 
   for( auto arg = F.arg_begin(); arg != F.arg_end(); ++arg) 
     _function_args.push_back(arg);
 
   for(BasicBlock &BB : F){
     for(Instruction &I : BB){
-      
+      //Reconhece os argumentos da função e busca o uso de cada uma no bloco básico      
       for(auto Op = I.op_begin(); Op != I.op_end(); ++Op){
         for(int i = 0; i <  _function_args.size(); i++){
           if(Op->get()->hasName() && _function_args[i]->hasName()){
@@ -113,15 +127,11 @@ bool LazyProfitability::runOnFunction(Function &F){
             
             std::string OpName = Op->get()->getName();
             if( OpName == name || OpName == name_addr){
-              errs() << "Gol: " << Op->get()->getName()  << " - " << \
-_function_args[i]->getName()<< "\nBB_name: " << BB.getName() <<"\n----------------\n"; 
+              PD->set_usesOfVarible(&BB, _function_args[i]);
             }
           }
         }
       }
-
-      
-
 
       //Reconhece valores resutlantes de funções que foram salvos em uma
       //variavel e inserem no map 1. A variavel 2. Achamada da função
@@ -212,8 +222,24 @@ _function_args[i]->getName()<< "\nBB_name: " << BB.getName() <<"\n--------------
         _id_function++;
         _n_functions++;
       }
-    }	
+    }
   }
+  int _argument_opportunity = 0;
+  for(int i = 0; i < _function_args.size(); i++){
+    bool _postDom = PD->VariablePostDominates(PDT, PD->get_entry(), 
+                                   PD->get_usesOfVariable(_function_args[i]));
+    if(_postDom)
+      _argument_opportunity++;
+  }
+
+  _has_not_arguments_post_dom.insert(std::pair<std::string, int>(F.getName(),
+                                                       _argument_opportunity));
+  errs() << "-----------------------------------\n";
+  errs() << "Function Arguments Analyze: \n";
+  errs() << "Name: " << F.getName() << "\n";
+  errs() << "Arguments Opportunities: " << _argument_opportunity << "\n";
+  errs() << "-----------------------------------\n\n";
+
   errs() << "Analyzed: " << _function_analyzed_map.size() << "\n";
   errs() << "Caller: " << _function_caller_map.size() << "\n";
   errs() << "Called: " << _function_called_map.size() << "\n";
@@ -224,7 +250,8 @@ _function_args[i]->getName()<< "\nBB_name: " << BB.getName() <<"\n--------------
   errs() << "ValueOp: " << _value_opportunity << "\n\n";
 
   dump_csv(_function_analyzed_map, _function_caller_map, _function_called_map, 
-     _has_function_as_arguments, _has_function_value_as_arguments,F.getName());
+     _has_function_as_arguments, _has_function_value_as_arguments,
+     _has_not_arguments_post_dom, F.getName());
 
   dump_summary_csv(F.getName(),_n_functions, _n_call, 
                    _value_opportunity, _function_opportunity);

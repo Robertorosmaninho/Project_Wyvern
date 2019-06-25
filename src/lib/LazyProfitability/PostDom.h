@@ -9,11 +9,11 @@
 
 using namespace llvm;
 
-  class PostDom : public FunctionPass{
+  class PostDom{
     private:
       BasicBlock *_entry, *_end;
       //std::vector<BasicBlock> _usesOfVariable;
-      std::map<Value*, std::vector<BasicBlock*> > *_var_uses; 
+      std::map<Value*, std::vector<BasicBlock*> > _var_uses; 
     
     public:
       PostDom();
@@ -25,10 +25,10 @@ using namespace llvm;
       void set_end(BasicBlock *BB);
       BasicBlock* get_end();
       
-      void set_usesOfVarible(BasicBlock *BB, Value v);      
-      std::vector<BasicBlock*>* get_usesOfVariable(Value v);
+      void set_usesOfVarible(BasicBlock* BB, Value *v);      
+      std::vector<BasicBlock*> get_usesOfVariable(Value *v);
 
-      bool VariablePostDominates(PostDominatorTree PDT, BasicBlock *entry, 
+      bool VariablePostDominates(PostDominatorTree *PDT, BasicBlock *entry, 
                                  std::vector<BasicBlock*> UsesOfVariable);
   };
 #endif
