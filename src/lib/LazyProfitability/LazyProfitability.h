@@ -52,15 +52,7 @@ private:
 
   void dump_summary_csv(std::string fileName,int n_functions, int n_call,
                           int value_opportunity, int function_opportunity);
-  
-  //The main ideia is to print a csv file with the follow columns:
-  //Id, FunctionName, FunctionCallerName, FunctionCalledName,
-  //HasFunctionAsArguments, HasValueFunction
-  //
-  //And other csv file that resumes the content of the program
-  //NameOfFunction,NumberOfFunctionsAnalyzed, NumberOfCalls, OpportunitiesValues, 
-  //                                                     OpportunitiesFunctions
-	
+
 
 static char ID;
 LazyProfitability() : FunctionPass(ID){}

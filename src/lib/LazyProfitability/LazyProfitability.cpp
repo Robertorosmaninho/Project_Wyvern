@@ -75,7 +75,7 @@ void LazyProfitability::dump_csv(std::map<int, std::string> &analyzed,
       _file << "," << 0;
     }
 
-    errs() << "PD: " << itPD->first << "\nF_name: " << itA->second << "\n";
+   // errs() << "PD: " << itPD->first << "\nF_name: " << itA->second << "\n";
     if(itPD != pd_argument.begin() && (itPD->first == itA->second)){
       _file << "," << itPD->second;
       //HasUsesofArgumentsThatPostDomTheEntry
@@ -111,12 +111,17 @@ bool LazyProfitability::runOnFunction(Function &F){
 
   PD->set_entry(&F.getEntryBlock());
 
- std::vector<Value*> _function_args;
+  std::vector<Value*> _function_args;
 
   for( auto arg = F.arg_begin(); arg != F.arg_end(); ++arg) 
     _function_args.push_back(arg);
-
+  int bb=0;
   for(BasicBlock &BB : F){
+   // bb++;
+    //if(bb == 1){
+    //  BB.setName("entry");
+    //  PD->set_entry(&BB);
+   // }
     for(Instruction &I : BB){
       //Reconhece os argumentos da função e busca o uso de cada uma no bloco básico      
       for(auto Op = I.op_begin(); Op != I.op_end(); ++Op){
