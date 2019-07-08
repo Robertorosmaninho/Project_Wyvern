@@ -2,8 +2,12 @@ import std.stdio;
 
 int foo(int a, int b){
 	if(a > 0)
-		return b;
+		b+=1;
+  else
+    b+=2;
 
+  b++;
+  a++;  
 	return 0;
 }
 
@@ -15,6 +19,6 @@ void main(string[] args){
 		soma+=i;
 
 	int c = foo(a, soma);
-
+  int d = foo(c, foo(a, soma));
 	writeln(c);
 }

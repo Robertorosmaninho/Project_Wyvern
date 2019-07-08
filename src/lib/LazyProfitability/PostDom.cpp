@@ -46,6 +46,9 @@ bool PostDom::VariablePostDominates(PostDominatorTree *PDT, BasicBlock *entry,
   int _post_dom_count = 0, _not_post_dom_count = 0;
   for(auto it = UsesOfVariable.begin(); it != UsesOfVariable.end(); ++it){
     BasicBlock *BB = *it;
+   // errs() << BB->getName() << "---------------\n";
+    //errs() << entry->getName() << "########\n";
+    
     DomTreeNodeBase<BasicBlock> *x = PDT->getNode(entry);
     DomTreeNodeBase<BasicBlock> *y = PDT->getNode(BB);
     if(PDT->dominates(y, x) && x != y){

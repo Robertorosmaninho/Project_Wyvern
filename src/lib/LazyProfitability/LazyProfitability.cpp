@@ -68,7 +68,6 @@ void LazyProfitability::case_2_Function_as_Agument(Use* argOp){
     //Associa o número de argumentos que são funções ao id da função chamada
     _has_function_as_arguments.insert(std::pair<int*, int>
                                          (this->_id_function, _call_function));
-
   }
   if(auto *regCall = dyn_cast<CallInst>(argOp)){
     auto *fn = regCall->getCalledFunction(); 
@@ -98,8 +97,13 @@ bool LazyProfitability::runOnFunction(Function &F){
 
   for( auto arg = F.arg_begin(); arg != F.arg_end(); ++arg) 
     _function_args.push_back(arg);
-
+  int bb=0;
   for(BasicBlock &BB : F){
+   // bb++;
+    //if(bb == 1){
+    //  BB.setName("entry");
+    //  PD->set_entry(&BB);
+   // }
     for(Instruction &I : BB){
       //Reconhece os argumentos da função e busca o uso de cada uma no bloco básico
       for(auto Op = I.op_begin(); Op != I.op_end(); ++Op){
