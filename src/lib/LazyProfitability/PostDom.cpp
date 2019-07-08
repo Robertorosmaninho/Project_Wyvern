@@ -43,16 +43,22 @@ std::vector<BasicBlock*> PostDom::get_usesOfVariable(Value *v){
 
 bool PostDom::VariablePostDominates(PostDominatorTree *PDT, BasicBlock *entry, 
                                     std::vector<BasicBlock*> UsesOfVariable){
-  int _post_dom_count = 0;
+  int _post_dom_count = 0, _not_post_dom_count = 0;
   for(auto it = UsesOfVariable.begin(); it != UsesOfVariable.end(); ++it){
     BasicBlock *BB = *it;
     DomTreeNodeBase<BasicBlock> *x = PDT->getNode(entry);
     DomTreeNodeBase<BasicBlock> *y = PDT->getNode(BB);
-    if(PDT->dominates(y, x) && x != y)
+    if(PDT->dominates(y, x) && x != y){
       _post_dom_count++;
+      return false;
+    }else{
+      if(x != y){
+        _not_post_dom_count++;
+      }
+    }
   }
 
-  if(_post_dom_count)
+  if(_not_post_dom_count)
     return true;
   else
     return false;

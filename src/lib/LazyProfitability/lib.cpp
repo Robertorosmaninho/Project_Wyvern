@@ -64,7 +64,7 @@ void dump_csv(std::map<int*, std::string> &analyzed,
       _file << "," << 0;
     }
 
-    errs() << "PD: " << itPD->first << "\nF_name: " << itA->second << "\n";
+    //errs() << "PD: " << itPD->first << "\nF_name: " << itA->second << "\n";
     if(itPD != pd_argument.begin() && (itPD->first == itA->second)){
       _file << "," << itPD->second;
       //HasUsesofArgumentsThatPostDomTheEntry
