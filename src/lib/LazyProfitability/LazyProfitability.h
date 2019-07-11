@@ -19,8 +19,8 @@
 #include "llvm/Pass.h"
 
 #include "lib.h"
-#include "PostDom.h"
-#include "../PDG/PDGAnalysis.cpp"
+#include "../PDG/PDGAnalysis.h"
+#include "../DFS/DFS.h"
 
 #include <fstream>
 #include <cstring>
@@ -37,24 +37,12 @@ private:
   bool _lazy_arguments, _caller_lazy_arguments;
   
   std::map<int*, std::string> _function_analyzed_map; //Id, Function Name
-  std::map<int*, std::string> _function_caller_map; //Id, Function Name
-  std::map<int*, std::string> _function_called_map; //Id, Function Name
-  std::map<int*, int> _has_function_as_arguments; //Id, If has lazy arguments
-  std::map<int*, int> _has_function_value_as_arguments; //Id, If an value can
                                                         //be lazy
-  std::map<std::string, int> _arguments_not_post_dom;
-  //NameOfCallerFunction, ArgumentsThatDoesn'tPostDomEntry
   
   std::set<Instruction*> _dependences;
   std::vector<std::set<Instruction*>> _dependeces_list;
 
   public:
-  void case_1_Value_as_Argument_Load(Use *argOP, int _function_value_used,
-                             std::map<Value*, Value*> *_stored_value_function); 
-
-  void case_1_Value_as_Argument_Store(Instruction *I, std::map<Value*, Value*> 
-                                                     * _stored_value_function);
-  void case_2_Function_as_Agument(Use *argOp);
 
 static char ID;
 LazyProfitability() : ModulePass(ID){}
