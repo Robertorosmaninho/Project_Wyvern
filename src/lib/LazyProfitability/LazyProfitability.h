@@ -18,13 +18,17 @@
 #include "llvm/IR/Instructions.h"
 #include "llvm/Pass.h"
 
+#include "lib.h"
+#include "PostDom.h"
+#include "../PDG/PDGAnalysis.cpp"
+
 #include <fstream>
 #include <cstring>
 #include <sstream>
 
 using namespace llvm;
 
-struct LazyProfitability : public FunctionPass{
+struct LazyProfitability : public ModulePass{
 private:
   int *_id_function = 0, _n_functions = 0, _n_call = 0, _value_opportunity = 0, 
       _function_opportunity = 0, _call_function = 0, _function_value_used = 0;
@@ -40,6 +44,9 @@ private:
                                                         //be lazy
   std::map<std::string, int> _arguments_not_post_dom;
   //NameOfCallerFunction, ArgumentsThatDoesn'tPostDomEntry
+  
+  std::set<Instruction*> _dependences;
+  std::vector<std::set<Instruction*>> _dependeces_list;
 
   public:
   void case_1_Value_as_Argument_Load(Use *argOP, int _function_value_used,
@@ -50,10 +57,10 @@ private:
   void case_2_Function_as_Agument(Use *argOp);
 
 static char ID;
-LazyProfitability() : FunctionPass(ID){}
+LazyProfitability() : ModulePass(ID){}
 
 void getAnalysisUsage(AnalysisUsage &AU) const;
-virtual bool runOnFunction(Function &F);
+virtual bool runOnModule(Module &M);
 };
 
 #endif

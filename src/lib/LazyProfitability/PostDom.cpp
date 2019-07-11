@@ -54,10 +54,10 @@ bool PostDom::VariablePostDominates(PostDominatorTree *PDT, BasicBlock *entry,
     if(PDT->dominates(y, x) && x != y){
       _post_dom_count++;
       return false;
-    }else{
-      if(x != y){
-        _not_post_dom_count++;
-      }
+    }else if(x==y){
+      return false;
+    }else if(x != y){
+      _not_post_dom_count++;
     }
   }
 

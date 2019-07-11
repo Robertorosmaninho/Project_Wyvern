@@ -1,4 +1,5 @@
-#include "LazyProfitability.h"
+//#include "LazyProfitability.h"
+#include "lib.h"
 
 //The main ideia is to print a csv file with the follow columns:
   //Id, FunctionName, FunctionCallerName, FunctionCalledName,
@@ -11,7 +12,7 @@
 
 //Imprime cada função analisada, cada função chamada e se há possibilidade
 //dessa função ser lazyficada
-void dump_csv(std::map<int*, std::string> &analyzed,
+void PrintCSV::dump_csv(std::map<int*, std::string> &analyzed,
       std::map<int*, std::string> &caller, std::map<int*, std::string> &called,
       std::map<int*, int> &f_argument,std::map<int*, int> &v_argument,
       std::map<std::string, int> &pd_argument, std::string functionName){
@@ -79,8 +80,8 @@ void dump_csv(std::map<int*, std::string> &analyzed,
 
 
 //Imprime o nome do programa analisado e a quantidade de oportunidades para usar
-//Lazy Evaluation
-void dump_summary_csv(std::string functionName,
+//Lazy Evaluation nos casos 1 e 2
+void PrintCSV::dump_summary_csv(std::string functionName,
   int n_functions, int n_call, int value_opportunity, int function_opportunity){
   //Define nome do arquivo
   std::ofstream _file;
@@ -91,6 +92,24 @@ void dump_summary_csv(std::string functionName,
                             OpportunitiesValues, OpportunitiesFunctions\n";
     _file << functionName << "," << n_functions << ","  << n_call << "," << \
              value_opportunity << "," << function_opportunity << "\n";
+  _file.close();
+}
+
+void PrintCSV::dump_post_dom_csv(std::string Benchmark, int num_functions, 
+                                              int num_args, int num_args_lazy){
+
+  std::ofstream _file;
+
+  Benchmark.pop_back();
+  Benchmark.pop_back();
+  Benchmark.pop_back();
+  Benchmark.pop_back();
+
+  std::string name = Benchmark + "_PostDom_Result.csv";
+  _file.open(name);
+  _file << "Benchmark, NumOfFunctions, NumOfArguments, NumOfLazyOpportunities\n";
+  _file << Benchmark << "," << num_functions << "," <<  num_args << "," << \
+           num_args_lazy << "\n";
   _file.close();
 }
 
