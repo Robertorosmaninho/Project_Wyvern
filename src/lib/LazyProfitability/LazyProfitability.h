@@ -30,14 +30,14 @@ using namespace llvm;
 
 struct LazyProfitability : public ModulePass{
 private:
-  int *_id_function = 0, _n_functions = 0, _n_call = 0, _value_opportunity = 0, 
+  int _id_function = 0, _n_functions = 0, _n_call = 0, _value_opportunity = 0, 
       _function_opportunity = 0, _call_function = 0, _function_value_used = 0;
   std::string _analyzed_function, _caller_function, _called_function, 
                                                             _argument_function;
   bool _lazy_arguments, _caller_lazy_arguments;
   
-  std::map<int*, std::string> _function_analyzed_map; //Id, Function Name
-                                                        //be lazy
+  //Id, Function, num args, num args that can be lazy
+  std::map<std::pair <int, Function*>, std::pair<int, int>> _function_map;
   
   std::set<Instruction*> _dependences;
   std::vector<std::set<Instruction*>> _dependeces_list;

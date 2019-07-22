@@ -14,12 +14,13 @@
 void LazyProfitability::getAnalysisUsage(AnalysisUsage &AU) const {
   AU.addRequired<PostDominatorTreeWrapperPass>();
   AU.addRequired<DepthFirstSearch>();
+  //AU.addRequired<>
   AU.setPreservesAll();
 }
 
 
 bool LazyProfitability::runOnModule(Module &M){ 
- // int _args = 0, _lazy_args = 0, _functions = 0;
+  int _args = 0, _lazy_args = 0; //, _functions = 0;
  // std::string _benchmark =  M.getModuleIdentifier();
  // PrintCSV *PrintCSV;
 
@@ -44,12 +45,29 @@ bool LazyProfitability::runOnModule(Module &M){
         for(Instruction &I : BB){
           if(CallInst* call = dyn_cast<CallInst>(&I)){
             Function *func = call->getCalledFunction();
-           // DepthFirstSearch* DFS = &getAnalysis<DepthFirstSearch>(F);
-            
+            DepthFirstSearch* DFS = &getAnalysis<DepthFirstSearch>(F);
+            /*This part run over the function to find a path that an argument 
+            has no use */
+            BasicBlock *bb = &func->getEntryBlock();
+            errs() << "CallInst: ";
+            I.dump();
+            errs() << "Função: " << func->getName() << "\n";
+            for(auto arg = func->arg_begin(); arg != func->arg_end(); ++arg){
+             // errs() << arg->getName() << "\n";
+              DFS->addBasicBlock(bb);
+              bool result = DFS->hasBlockWithoutUse(arg, bb);
+              _args++;
+              if(result)
+                _lazy_args++;
+            }
+            _function_map.insert(std::make_pair(
+                                           std::make_pair(_id_function++,func),
+                                           std::make_pair(_args, _lazy_args)));
             for(unsigned i = 0; i < call->getNumOperands(); i++){
               Value *v = call->getOperand(i);
               if(isa<Instruction>(v)){
-   //             errs() << "Instrução: " << *v << "\n";
+                errs() << "Instrução: " << *v << "\n";
+                
               }
             }
           }

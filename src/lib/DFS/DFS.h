@@ -38,7 +38,6 @@ class DepthFirstSearch : public FunctionPass{
     void addBasicBlock(BasicBlock* BB);
     std::queue<BasicBlock*> get_DFS(); //return the DFS
 
-    bool hasPathWithoutUse(Value* v, Function* F);
     bool hasBlockWithoutUse(Value* v, BasicBlock* BB);
     bool hasUse(BasicBlock* BB, Value* V);
     bool isReturnBlock(BasicBlock* BB);
