@@ -28,7 +28,7 @@ bool LazyProfitability::runOnModule(Module &M){
  
     if(!F.isDeclaration()){
 
-      DepthFirstSearch* DFS = &getAnalysis<DepthFirstSearch>(F);
+  //    DepthFirstSearch* DFS = &getAnalysis<DepthFirstSearch>(F);
       errs() << "Args: ";
       for( auto arg = F.arg_begin(); arg != F.arg_end(); ++arg){
         _function_args.push_back(arg);
@@ -36,13 +36,16 @@ bool LazyProfitability::runOnModule(Module &M){
       }
       errs() << "\n";
       for(BasicBlock &BB : F){
-        errs() << "#########\n";
-        errs() << BB.getName() << "\n";
+   //     errs() << "#########\n";
+  //      errs() << BB.getName() << "\n";
         for(unsigned i = 0; i < _function_args.size(); i++)
-          errs() << DFS->hasUse(&BB, _function_args[i]) << "\n";
+//          errs() << DFS->hasUse(&BB, _function_args[i]) << "\n";
 
         for(Instruction &I : BB){
           if(CallInst* call = dyn_cast<CallInst>(&I)){
+            Function *func = call->getCalledFunction();
+           // DepthFirstSearch* DFS = &getAnalysis<DepthFirstSearch>(F);
+            
             for(unsigned i = 0; i < call->getNumOperands(); i++){
               Value *v = call->getOperand(i);
               if(isa<Instruction>(v)){

@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int foo(int a, int b){
+void foo(int a, int b){
 	if(a > 0)
 		 b = b + 1;
   else
@@ -13,7 +13,7 @@ int foo(int a, int b){
           return b;
       return b;
   */
-	return 0;
+//	return 0;
 }
 
 int main(int argc, char **argv){
@@ -24,9 +24,9 @@ int main(int argc, char **argv){
 	for (int i = 0; i < argc; i++) {
 		sum += i;
 	}
-	int c = foo(a, sum);
-  int d = foo(c, foo(a, sum));
+	/*int c =*/ foo(a, sum);
+ // int d = foo(c, foo(a, sum));
 
-	printf("%d \n", c);
+//	printf("%d \n", c);
 return 0;
 }

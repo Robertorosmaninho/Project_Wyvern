@@ -20,6 +20,7 @@
 #include <map>
 #include <stack>
 #include <queue>
+#include <vector>
 
 using namespace llvm;
 
@@ -31,12 +32,14 @@ class DepthFirstSearch : public FunctionPass{
     std::queue<BasicBlock*> _path;
 
   public:
-    void reset_visited(Function &F);
+    void set_unvisited(Function *F);
+    void reset_visited();
     bool has_visited(BasicBlock* BB);
     void addBasicBlock(BasicBlock* BB);
     std::queue<BasicBlock*> get_DFS(); //return the DFS
 
-    bool hasPathWithoutUSe(Value* v);
+    bool hasPathWithoutUse(Value* v, Function* F);
+    bool hasBlockWithoutUse(Value* v, BasicBlock* BB);
     bool hasUse(BasicBlock* BB, Value* V);
     bool isReturnBlock(BasicBlock* BB);
     bool isSucessor(BasicBlock* BB,BasicBlock* Sucessor);
