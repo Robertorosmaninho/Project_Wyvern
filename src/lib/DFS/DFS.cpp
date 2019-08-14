@@ -115,7 +115,8 @@ bool DepthFirstSearch::hasBlockWithoutUse(Value* v, BasicBlock* BB){
         if(verify)
           return true;
       }else{
-        errs() << "Sucessor have been visited already!\n";
+        //Sucessor have been visited already!
+        continue;
       }
     }
   }
