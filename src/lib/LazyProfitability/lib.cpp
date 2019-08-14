@@ -115,7 +115,7 @@ void PrintCSV::dump_post_dom_csv(std::string Benchmark, int num_functions,
 }
 
 void PrintCSV::dump_DFS_csv(std::string Benchmark, int num_functions, 
-       int num_args, int num_args_lazy, int problem, int solved, int unsolved){
+                                              int num_args, int num_args_lazy){
 
   std::ofstream _file;
 
@@ -130,9 +130,9 @@ void PrintCSV::dump_DFS_csv(std::string Benchmark, int num_functions,
   std::string name = Benchmark + "_DFS_Result.csv";
   _file.open(name);
   _file << "Benchmark, NumOfCallFunctions, NumOfArguments, ";
-  _file << "NumOfLazyOpportunities, Problem, Solved, Unsolved\n";
+  _file << "NumOfLazyOpportunities\n";
   _file << Benchmark << "," << num_functions << "," <<  num_args << "," << \
-           num_args_lazy << "," << problem << "," << solved << "," << unsolved << "\n";
+           num_args_lazy << "\n";
   _file.close();
 }
 

@@ -17,6 +17,6 @@ class PrintCSV{
 
     void dump_post_dom_csv(std::string Benchmark, int num_functions,
                                               int num_args, int num_args_lazy);
-    void dump_DFS_csv(std::string Benchmark, int num_functions,
-       int num_args, int num_args_lazy, int problem, int solved, int unsolved);
+    void dump_DFS_csv(std::string Benchmark, int num_functions, int num_args,
+                                                            int num_args_lazy);
 };
