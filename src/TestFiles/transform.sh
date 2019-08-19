@@ -6,6 +6,7 @@ ProgramName=$1
 $CLANG -S -emit-llvm -Xclang -disable-O0-optnone $ProgramName.c -o $ProgramName.ll
 $OPT -S -mem2reg $ProgramName.ll -o $ProgramName.ssa.ll -debug-pass=Structure
 
-$OPT -dot-postdom -dot-regions -dot-cfg -dot-dom $ProgramName.ssa.ll
+#$OPT -dot-postdom -dot-regions -dot-cfg -dot-dom $ProgramName.ll
+$OPT -dot-cfg $ProgramName.ssa.ll
 #dot -Tpdf *.dot -o *.pdf
 #open *.pdf 

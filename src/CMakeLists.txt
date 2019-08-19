@@ -43,3 +43,4 @@ endif()
 
 add_subdirectory(lib/LazyProfitability)
 add_subdirectory(lib/PDG)
+add_subdirectory(lib/DFS)
