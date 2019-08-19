@@ -37,9 +37,9 @@ bool LazyProfitability::runOnModule(Module &M){
           //Pega a Função chamada pela CallInst
           Function *func = call->getCalledFunction();
           //Testa se é uma chamada indireta
-          if(func == nullptr || func->isDeclaration())
+          if(func == nullptr || func->isDeclaration() || !func->hasName())
             continue; 
-
+          
           DepthFirstSearch* DFS = &getAnalysis<DepthFirstSearch>(F);
           /*This part run over the function to find a path that an argument 
             has no use */
