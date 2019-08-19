@@ -1,19 +1,19 @@
 #include <stdio.h>
 
-void foo(int a, int b){
-	if(a > 0)
-		 b = b + 1;
-  else
-     b = b - 1;
+int foo(int a, int b){
+//	if(a > 0)
+	//	 b = b + 1;
+//  else
+  //   b = b - 1;
   
-  b++;
-  a++;  
+//  b++;
+//  a++;  
   //Temos que pensar no caso de retornar b
-  /*    if(a > 0)
+      if(a > 0)
           return b;
-      return b;
-  */
-//	return 0;
+//      return b;
+  
+	return 0;
 }
 
 int main(int argc, char **argv){

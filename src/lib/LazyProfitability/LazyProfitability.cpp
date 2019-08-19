@@ -61,8 +61,8 @@ bool LazyProfitability::runOnModule(Module &M){
 
           //Add ID, Function, num_args and num_lazy_args into a map
           _function_map.insert(std::make_pair(
-                                           std::make_pair(_id_function++,func),
-                                           std::make_pair(_args, _lazy_args)));
+                                std::make_pair(_id_function++,func->getName()),
+                                std::make_pair(_args, _lazy_args)));
           //Calculate the dependences of the function
           phoenix::ProgramDependenceGraph PDG;
           PDG.compute_dependences(func);
@@ -84,8 +84,8 @@ bool LazyProfitability::runOnModule(Module &M){
       }
     }
   }
- // PrintCSV->dump_post_dom_csv(_benchmark, _id_function+1, _num_args, 
- //                                                              _num_lazy_args);
+  PrintCSV->dump_summary_csv(_benchmark, _function_map);
+                                 
   PrintCSV->dump_DFS_csv(_benchmark, _id_function, _num_args,_num_lazy_args);
   return false;
 }

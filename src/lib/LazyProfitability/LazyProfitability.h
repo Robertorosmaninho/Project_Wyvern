@@ -34,7 +34,7 @@ private:
   int _id_function = 0;
 
   //Id, Function, num args, num args that can be lazy
-  std::map<std::pair <int, Function*>, std::pair<int, int>> _function_map;
+  std::map<std::pair <int, std::string>, std::pair<int, int>> _function_map;
   
   std::set<Instruction*> _dependences;
   std::vector<std::set<Instruction*>> _dependeces_list;
