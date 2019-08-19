@@ -93,7 +93,7 @@ bool DepthFirstSearch::isSucessor(BasicBlock* BB,BasicBlock* Sucessor){
 bool DepthFirstSearch::hasBlockWithoutUse(Value* v, BasicBlock* BB){
 
   Instruction* I = BB->getTerminator();
-
+ 
   if(hasUse(BB, v))
     return false;
   else
