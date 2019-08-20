@@ -70,3 +70,10 @@ Simply clone this repository
 git clone --recursive https://github.com/Robertorosmaninho/Project_Wyvern.git
 ```
 
+### Building the Passes
+
+Just get into the directory of the project and type:
+```
+./build.sh LLVM_DIR
+```
+Where LLVM_DIR is the directory that you installed the LLVM.
