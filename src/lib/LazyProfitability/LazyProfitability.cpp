@@ -19,7 +19,7 @@ void LazyProfitability::getAnalysisUsage(AnalysisUsage &AU) const {
 
 
 bool LazyProfitability::runOnModule(Module &M){ 
-  int _num_args = 0, _num_lazy_args = 0;
+  int _num_args = 0, _num_lazy_args = 0, _num_function = 0;
   std::string _benchmark =  M.getModuleIdentifier();
   PrintCSV *PrintCSV;
 
@@ -27,13 +27,14 @@ bool LazyProfitability::runOnModule(Module &M){
     if(F.isDeclaration())
       continue;
 
+    _num_function++;
     errs() << "\n=======================\n";
     errs() << "Function Name: " << F.getName() << "\n"; 
 
     for(BasicBlock &BB : F){
       for(Instruction &I : BB){
         if(CallInst* call = dyn_cast<CallInst>(&I)){
-          int _args = 0, _lazy_args = 0;
+          int _args = 0, _lazy_args = 0;//, _calls = 0;
           //Pega a Função chamada pela CallInst
           Function *func = call->getCalledFunction();
           //Testa se é uma chamada indireta
@@ -61,7 +62,7 @@ bool LazyProfitability::runOnModule(Module &M){
 
           //Add ID, Function, num_args and num_lazy_args into a map
           _function_map.insert(std::make_pair(
-                                std::make_pair(_id_function++,func->getName()),
+                                std::make_pair(_num_calls++,func->getName()),
                                 std::make_pair(_args, _lazy_args)));
           //Calculate the dependences of the function
           phoenix::ProgramDependenceGraph PDG;
@@ -86,7 +87,7 @@ bool LazyProfitability::runOnModule(Module &M){
   }
   PrintCSV->dump_summary_csv(_benchmark, _function_map);
                                  
-  PrintCSV->dump_DFS_csv(_benchmark, _id_function, _num_args,_num_lazy_args);
+  PrintCSV->dump_DFS_csv(_benchmark, _num_function, _num_calls,_num_args,_num_lazy_args);
   return false;
 }
 
