@@ -19,7 +19,7 @@ void PrintCSV::dump_summary_csv(std::string Benchmark,
 
 
 void PrintCSV::dump_DFS_csv(std::string Benchmark, int num_functions, 
-                                              int num_args, int num_args_lazy){
+                             int num_calls, int num_args, int num_args_lazy){
 
   std::ofstream _file;
 
@@ -33,9 +33,9 @@ void PrintCSV::dump_DFS_csv(std::string Benchmark, int num_functions,
 
   std::string name = Benchmark + "_DFS_Result.csv";
   _file.open(name);
-  _file << "Benchmark, NumOfCallFunctions, NumOfArguments, ";
+  _file << "Benchmark, NumFunctions, NumOfCallFunctions, NumOfArguments, ";
   _file << "NumOfLazyOpportunities\n";
-  _file << Benchmark << "," << num_functions << "," <<  num_args << "," << \
+  _file << Benchmark << "," << num_functions<< "," << num_calls << "," <<  num_args << "," << \
            num_args_lazy << "\n";
   _file.close();
 }

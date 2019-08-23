@@ -67,6 +67,13 @@ If you have any issue to install these tools, please have a look on the [Dlang W
 Simply clone this repository
 
 ```
-git clone --recursive http://cuda.dcc.ufmg.br:8080/Robertorosmaninho/Project_Wyvern.git
+git clone --recursive https://github.com/Robertorosmaninho/Project_Wyvern.git
 ```
 
+### Building the Passes
+
+Just get into the directory of the project and type:
+```
+./build.sh LLVM_DIR
+```
+Where LLVM_DIR is the directory that you installed the LLVM.

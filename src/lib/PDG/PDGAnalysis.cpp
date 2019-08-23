@@ -58,9 +58,9 @@ void ProgramDependenceGraph::create_control_edges(BasicBlock *Y, Value *pred) {
   if (pred == nullptr)
     return;
 
-  for (Value &y : *Y) {
-    if (!isa<TerminatorInst>(y))
-      DG->add_edge(&y, pred, DT_Control);
+  for (Instruction &y : *Y) {
+		if(y.isTerminator())
+    		DG->add_edge(&y, pred, DT_Control);
   }
 }
 

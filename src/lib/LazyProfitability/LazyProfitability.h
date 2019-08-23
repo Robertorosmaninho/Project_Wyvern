@@ -31,7 +31,7 @@ using namespace llvm;
 
 struct LazyProfitability : public ModulePass{
 private:
-  int _id_function = 0;
+  int _num_calls = 0;
 
   //Id, Function, num args, num args that can be lazy
   std::map<std::pair <int, std::string>, std::pair<int, int>> _function_map;
